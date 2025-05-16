@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger("GimpMCPServer")
 
 class GimpConnection:
-    def __init__(self, host='localhost', port=9876):
+    def __init__(self, host='localhost', port=9877):
         self.host = host
         self.port = port
         self.sock = None

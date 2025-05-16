@@ -38,13 +38,13 @@ class MCPPlugin(Gimp.PlugIn):
         """Run the plugin and start the server."""
         server_thread = threading.Thread(target=self.start_server, daemon=True)
         server_thread.start()
-        print("MCP Server started on localhost:9876")
+        print("MCP Server started on localhost:9877")
         return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 
     def start_server(self):
         """Start a socket server to listen for commands."""
         host = 'localhost'
-        port = 9876
+        port = 9877
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((host, port))
