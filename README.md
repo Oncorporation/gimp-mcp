@@ -51,8 +51,7 @@ Before integrating MCP with GIMP, ensure you have the following:
    Ensure you have the necessary Python libraries:  
    `pip install -r requirements.txt`
 
-
-4. Run the MCP Server:
+3. Run the MCP Server:
    Start the server to enable communication between GIMP and AI models:  
    `python mcp_server.py`
 

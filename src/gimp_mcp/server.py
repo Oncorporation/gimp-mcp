@@ -77,13 +77,13 @@ def call_api(ctx: Context, api_path: str, args: list = [], kwargs: dict = {}) ->
 
 # Specific tools for common operations
 @mcp.tool()
-def list_images(ctx: Context) -> str:
+def get_images(ctx: Context) -> str:
     """List all open images in GIMP.
 
     Returns:
     - JSON string of image IDs and names
     """
-    return call_api(ctx, "Gimp.list_images")
+    return call_api(ctx, "Gimp.get_images")
 
 @mcp.tool()
 def get_image_info(ctx: Context, image_id: int) -> str:
