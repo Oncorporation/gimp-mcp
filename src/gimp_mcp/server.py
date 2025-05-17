@@ -56,7 +56,7 @@ mcp = FastMCP("GimpMCP", description="GIMP integration through MCP")
 
 @mcp.tool()
 def call_api(ctx: Context, api_path: str, args: list = [], kwargs: dict = {}) -> str:
-    """Call any GIMP API method dynamically.
+    """Call any GIMP 3.0 API method dynamically.
 
     Parameters:
     - api_path: The path to the API method (e.g., "Gimp.Image.get_by_id")
