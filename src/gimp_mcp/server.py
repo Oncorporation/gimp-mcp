@@ -34,6 +34,7 @@ class GimpConnection:
         try:
             self.sock.sendall(json.dumps(command).encode('utf-8'))
             response = self.sock.recv(1024)
+            self.sock = None
             return json.loads(response.decode('utf-8'))
         except Exception as e:
             logger.error(f"Communication error: {e}")
