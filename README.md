@@ -98,6 +98,13 @@ The following are some of the API commands available through the MCP integration
 
 For a comprehensive list of commands and their parameters, refer to the GIMP Python API documentation.
 
+## Extras
+
+### gimp-api-scraper.py
+
+This was created to scrape the Gimp 3.0 API documentation and turn it into an OpenAPI spec for easier
+consumption by the Model Context Protocol.
+
 ## Contributing
 
 We welcome contributions to enhance GIMP-MCP:
