@@ -8,13 +8,14 @@
 - [Features](#features)
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
-  - [Setting Up the MCP Server](#setting-up-the-mcp-server)
-  - [Integrating MCP with GIMP](#integrating-mcp-with-gimp)
+  - [Installing the GIMP-MCP Plugin](#installing-the-gimp-mcp-plugin)
+- [Client Interaction](#client-interaction)
 - [Usage Examples](#usage-examples)
   - [AI-Powered Background Removal](#ai-powered-background-removal)
   - [Image Inpainting with AI](#image-inpainting-with-ai)
 - [Human-AI Interaction Prompts](#human-ai-interaction-prompts)
 - [Available API Commands](#available-api-commands)
+- [Additional Resources](#additional-resources)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -33,77 +34,114 @@ The **Model Context Protocol (MCP)** is an open standard developed to facilitate
 
 ### Prerequisites
 
-Before integrating MCP with GIMP, ensure you have the following:
+Before installing the GIMP-MCP plugin, ensure you have the following:
 
 - **GIMP 3.0** or later installed on your system.
 - **Python 3.x** installed.
+- **PyGObject**: This is required for the `gi` bindings used by GIMP Python plugins. Installation varies by OS:
+    - Linux: Often available via system package manager (e.g., `sudo apt install python3-gi`).
+    - Windows/macOS: May require specific installers or `pip install PyGObject` if build tools are configured. Refer to [PyGObject documentation](https://pygobject.readthedocs.io/en/latest/getting_started.html).
 - Basic knowledge of Python scripting and GIMP's plugin architecture.
 
-### Setting Up the MCP Server
+### Installing the GIMP-MCP Plugin
 
-1. **Clone the MCP Repository**:
-   ```bash
-   git clone https://github.com/SgtRaccoon/gimp-mcp.git
-   cd servers
-   ```
+The GIMP-MCP plugin (`gimp-mcp-plugin.py`) integrates GIMP with MCP and starts a server instance when activated within GIMP.
 
-2. Install Dependencies:
-   Ensure you have the necessary Python libraries:  
-   `pip install -r requirements.txt`
+1.  **Clone the GIMP-MCP Repository**:```bash
+git clone https://github.com/oncorporation/gimp-mcp.git
+cd gimp-mcp
+```    (Note: The `gimp-mcp-plugin.py` file should be in the root of this repository).
 
-3. Run the MCP Server:
-   Start the server to enable communication between GIMP and AI models:  
-   `python mcp_server.py`
+2.  **Locate GIMP’s Plugin Directory**:
+    *   Linux: `~/.config/GIMP/3.0/plug-ins/`
+    *   Windows: `C:\Users\<username>\AppData\Roaming\GIMP\3.0\plug-ins\`
+    *   macOS: `~/Library/Application Support/GIMP/3.0/plug-ins/`
 
+3.  **Copy the Plugin File**:
+    *   Create a directory in the plug-ins folder named `gimp-mcp-plugin` (e.g., `~/.config/GIMP/3.0/plug-ins/gimp-mcp-plugin/`).
+    *   Place the `gimp-mcp-plugin.py` file (from the cloned repository) into this newly created directory.
 
-## Integrating MCP with GIMP
-1. Locate GIMP’s Plugin Directory:
-   - Linux: ~/.config/GIMP/3.0/plug-ins/
-   - Windows: C:\Users\<username>\AppData\Roaming\GIMP\3.0\plug-ins\
-   - macOS: ~/Library/Application Support/GIMP/3.0/plug-ins/
-2. Copy the Plugin File:
-	 - Create a directory in the plug-ins folder named gimp-mcp-plugin.
-   - Place the gimp-mcp-plugin.py file into the newly created directory.
-3. Make the Plugin Executable (Linux/macOS):
-   - `chmod +x ~/.config/GIMP/3.0/plug-ins/gimp-mcp-plugin/gimp-mcp-plugin.py`
-4. Restart GIMP:
-   - Relaunch GIMP to recognize the new plugin. You should see Start MCP Server under Filters > Development.
+4.  **Make the Plugin Executable (Linux/macOS)**:```bash
+chmod +x <your_gimp_plugin_directory>/gimp-mcp-plugin/gimp-mcp-plugin.py
+```    (Replace `<your_gimp_plugin_directory>` with the actual path from step 2, e.g., `~/.config/GIMP/3.0/plug-ins`).
+
+5.  **Restart GIMP**:
+    Relaunch GIMP to recognize the new plugin.
+
+6.  **Start the MCP Server via GIMP**:
+    To start the MCP server, navigate to `Filters > Development > Start MCP Server` in GIMP's menu. This will activate the plugin and initiate the server, which will then listen on `localhost:9876` (or as configured).
+
+## Client Interaction
+
+Once the MCP server is running within GIMP (activated via the plugin), an external MCP client application is needed to send commands to GIMP. An example client (`gimp_mcp_client.py` in some older versions or related projects) can serve as a basic template for how a Python client connects to the server and sends JSON-based commands to interact with GIMP.
+
+The typical workflow involves the client sending a JSON object specifying the `type` of command (e.g., `call_api`) and `params` detailing the GIMP procedure to execute along with its arguments.
 
 ## Usage Examples
 
-**Human-AI Interaction Prompts**
+(Ensure the MCP server is started via the GIMP plugin as described above, and you have an MCP client to send commands.)
 
-To effectively utilize AI within GIMP via MCP, consider the following interaction prompts:
-- Object Recognition:
-- Prompt: “Identify and select all objects in the image.”
-- AI Response: The AI highlights and categorizes each object detected.
-- Style Transfer:
-- Prompt: “Apply Van Gogh’s Starry Night style to the current image.”
-- AI Response: The image is transformed to emulate the specified artistic style.
-- Image Enhancement:
-- Prompt: “Enhance the image resolution and reduce noise.”
-- AI Response: The AI upscales the image and applies noise reduction techniques.
+### AI-Powered Background Removal
 
-**Available API Commands**
+### Image Inpainting with AI
 
-The following are some of the API commands available through the MCP integration:
-- gimp_image_new: Create a new image.
-- gimp_layer_new: Add a new layer to an image.
-- gimp_text_layer_new: Create a new text layer.
-- gimp_file_load: Load an image file.
-- gimp_file_save: Save the current image to a file.
-- gimp_edit_fill: Fill a selection or layer with a specified color.
-- gimp_context_set_foreground: Set the foreground color.
-- gimp_layer_set_offsets: Set the position of a layer within an image.
+## Human-AI Interaction Prompts
 
-For a comprehensive list of commands and their parameters, refer to the GIMP Python API documentation.
+To effectively utilize AI within GIMP via MCP, an AI client application would typically interpret human prompts and translate them into actions. These actions often involve communicating with AI models and then using MCP to instruct GIMP:
+
+*   **Object Recognition**:
+    *   User Prompt to AI Client: “Identify and select all objects in the image.”
+    *   AI Client Process:
+        1.  Retrieves image from GIMP via MCP.
+        2.  Sends to an object recognition AI model.
+        3.  Receives object boundaries/masks from the model.
+        4.  Uses MCP to send commands to GIMP to create selections based on these boundaries.
+*   **Style Transfer**:
+    *   User Prompt to AI Client: “Apply Van Gogh’s Starry Night style to the current image.”
+    *   AI Client Process:
+        1.  Retrieves image from GIMP.
+        2.  Sends to a style transfer AI model along with the style reference.
+        3.  Receives stylized image.
+        4.  Uses MCP to update the image in GIMP.
+*   **Image Enhancement**:
+    *   Prompt: “Enhance the image resolution and reduce noise.”
+    *   AI Response: The AI upscales the image and applies noise reduction techniques.
+
+## Available API Commands
+
+The `gimp-mcp-plugin.py` plugin allows external MCP clients to call GIMP PDB (Procedural Database) functions using a JSON structure. The primary command `type` is `call_api`.
+
+Example JSON command sent by a client:{
+  "type": "call_api",
+  "params": {
+    "api_path": "Image.new",
+    "args": [400, 300, 0],
+    "kwargs": {}
+  }
+}(In this example, `api_path: "Image.new"` might correspond to `Gimp.Image.new` or a similar PDB call, `args` are positional arguments like width, height, Gimp.ImageType (0 for RGB), and `kwargs` for named arguments.)
+
+Commonly used `api_path` values correspond to GIMP procedures (often found within `Gimp.PDB` or as methods of `Gimp` objects). The plugin resolves `api_path` by `getattr` starting from the `Gimp` module. Some examples:
+- `Image.new`: Create a new image.
+- `Layer.new`: Add a new layer.
+- `TextLayer.new`: Create a new text layer.
+- `file_load`: Load an image file.
+- `file_save`: Save the current image.
+- `edit_fill`: Fill a selection or layer.
+- `context_set_foreground`: Set the foreground color.
+- `Layer.set_offsets`: Set layer position.
+
+The specific command names like `gimp_image_new` mentioned previously might be simplified representations or aliases. For a comprehensive list of GIMP procedures and their parameters, refer to the official GIMP Python API documentation (accessible through GIMP's help system: `Help > Python Console`, then browse PDB).
 
 ## Extras
 
 ### gimp-api-scraper.py
 
-This was created to scrape the Gimp 3.0 API documentation and turn it into an OpenAPI spec for easier
-consumption by the Model Context Protocol.
+This was created to scrape the Gimp 3.0 API documentation and turn it into an OpenAPI spec for easier consumption by the Model Context Protocol.
+
+## Additional Resources
+
+- **MCP Hub - GIMP MCP**: For more details and context on GIMP MCP integrations, you might find information on sites like [mcphub.tools](https://mcphub.tools/detail/libreearth/gimp-mcp) (note: this link points to the `libreearth` fork, but may still contain relevant conceptual information).
+- **GIMP Python Documentation**: Consult the official GIMP documentation for Python scripting and available PDB procedures.
 
 ## Contributing
 
