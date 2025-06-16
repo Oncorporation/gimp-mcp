@@ -6,6 +6,7 @@ from mcp.server.fastmcp import FastMCP, Context
 import socket
 import json
 import logging
+import inspect
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("GimpMCPServer")
