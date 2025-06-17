@@ -641,7 +641,7 @@ def Gimp_ColorTransform_process_buffer(ctx: Context, src_buffer: str, src_rect: 
     return call_api(ctx, 'Gimp.ColorTransform.process_buffer', args=[src_buffer, src_rect, dest_buffer, dest_rect])
 
 @mcp.tool()
-def Gimp_ColorTransform_process_pixels(ctx: Context, src_format: str, src_pixels: str = None, dest_format: str, dest_pixels: str = None, length: int) -> str:
+def Gimp_ColorTransform_process_pixels(ctx: Context, src_format: str, src_pixels: str = None, dest_format: str = None, dest_pixels: str = None, length: int = 0) -> str:
     """This function transforms a contiguous line of pixels.
 
     :param src_format: Babl format of src_pixels.
@@ -690,28 +690,30 @@ def Gimp_Display_present(ctx: Context) -> str:
 @mcp.tool()
 def Gimp_Drawable_append_filter(ctx: Context, filter: str) -> str:
     """This procedure appends the specified drawable effect at the top of the
-effect list of drawable.
+    effect list of drawable.
 
     :param filter: The drawable filter to append.
     """
     return call_api(ctx, 'Gimp.Drawable.append_filter', args=[filter])
 
 @mcp.tool()
-def Gimp_Drawable_append_new_filter(ctx: Context, operation_name: str, name: str, mode: str, opacity: float, ...: str = None) -> str:
+def Gimp_Drawable_append_new_filter(ctx: Context, operation_name: str, name: str, mode: str, opacity: float, *filter_args: str) -> str:
     """Utility function which combines gimp_drawable_filter_new()
-followed by setting arguments for the
-GimpDrawableFilterConfig returned by
-gimp_drawable_filter_get_config(), and finally appending with
-gimp_drawable_append_filter()
+    followed by setting arguments for the
+    GimpDrawableFilterConfig returned by
+    gimp_drawable_filter_get_config(), and finally appending with
+    gimp_drawable_append_filter()
 
-    :param operation_name: The GEGL operation’s name.
-    :param name: The effect name.
-    :param mode: The blend mode.
-    :param opacity: The opacity from 0.0 (transparent) to 1.0 (opaque).
-    :param ...: A NULL-terminated list of operation argument names
-                 and values.
+    :param operation_name: The GEGL operation’s name.
+    :param name: The effect name.
+    :param mode: The blend mode.
+    :param opacity: The opacity from 0.0 (transparent) to 1.0 (opaque).
+    :param filter_args: A variable-length list of operation argument names and values.
+                        The list will be null-terminated automatically.
     """
-    return call_api(ctx, 'Gimp.Drawable.append_new_filter', args=[operation_name, name, mode, opacity, ...])
+    # Build the argument list by appending a None to serve as a null terminator.
+    args = [operation_name, name, mode, opacity] + list(filter_args) + [None]
+    return call_api(ctx, 'Gimp.Drawable.append_new_filter', args=args)
 
 @mcp.tool()
 def Gimp_Drawable_brightness_contrast(ctx: Context, brightness: float, contrast: float) -> str:
@@ -1136,7 +1138,7 @@ def Gimp_Drawable_merge_filters(ctx: Context) -> str:
     return call_api(ctx, 'Gimp.Drawable.merge_filters', args=[])
 
 @mcp.tool()
-def Gimp_Drawable_merge_new_filter(ctx: Context, operation_name: str, name: str, mode: str, opacity: float, ...: str = None) -> str:
+def Gimp_Drawable_merge_new_filter(ctx: Context, operation_name: str, name: str, mode: str, opacity: float, *filter_args: str) -> str:
     """Utility function which combines gimp_drawable_filter_new()
 followed by setting arguments for the
 GimpDrawableFilterConfig returned by
@@ -1150,7 +1152,8 @@ effect to drawable with gimp_drawable_merge_filter()
     :param ...: A NULL-terminated list of operation argument names
                  and values.
     """
-    return call_api(ctx, 'Gimp.Drawable.merge_new_filter', args=[operation_name, name, mode, opacity, ...])
+    args = [operation_name, name, mode, opacity] + list(filter_args) + [None]
+    return call_api(ctx, 'Gimp.Drawable.merge_new_filter', args=args)
 
 @mcp.tool()
 def Gimp_Drawable_merge_shadow(ctx: Context, undo: bool) -> str:
@@ -2528,7 +2531,7 @@ def Gimp_Image_import_paths_from_string(ctx: Context, string: str, length: int, 
     return call_api(ctx, 'Gimp.Image.import_paths_from_string', args=[string, length, merge, scale, paths])
 
 @mcp.tool()
-def Gimp_Image_insert_channel(ctx: Context, channel: str, parent: str = None, position: int) -> str:
+def Gimp_Image_insert_channel(ctx: Context, channel: str, parent: str = None, position: int = 0) -> str:
     """Add the specified channel to the image.
 
     :param channel: The channel.
@@ -2538,7 +2541,7 @@ def Gimp_Image_insert_channel(ctx: Context, channel: str, parent: str = None, po
     return call_api(ctx, 'Gimp.Image.insert_channel', args=[channel, parent, position])
 
 @mcp.tool()
-def Gimp_Image_insert_layer(ctx: Context, layer: str, parent: str = None, position: int) -> str:
+def Gimp_Image_insert_layer(ctx: Context, layer: str, parent: str = None, position: int = 0) -> str:
     """Add the specified layer to the image.
 
     :param layer: The layer.
@@ -2548,7 +2551,7 @@ def Gimp_Image_insert_layer(ctx: Context, layer: str, parent: str = None, positi
     return call_api(ctx, 'Gimp.Image.insert_layer', args=[layer, parent, position])
 
 @mcp.tool()
-def Gimp_Image_insert_path(ctx: Context, path: str, parent: str = None, position: int) -> str:
+def Gimp_Image_insert_path(ctx: Context, path: str, parent: str = None, position: int = 0) -> str:
     """Add the specified path to the image.
 
     :param path: The path.
@@ -2677,7 +2680,7 @@ def Gimp_Image_metadata_save_prepare(ctx: Context, mime_type: str, suggested_fla
     return call_api(ctx, 'Gimp.Image.metadata_save_prepare', args=[mime_type, suggested_flags])
 
 @mcp.tool()
-def Gimp_Image_pick_color(ctx: Context, drawables: str = None, x: float, y: float, sample_merged: bool, sample_average: bool, average_radius: float, color: str) -> str:
+def Gimp_Image_pick_color(ctx: Context, drawables: str = None, x: float = 0, y: float = 0, sample_merged: bool = False, sample_average: bool = False, average_radius: float = 0.0, color: str = None) -> str:
     """Determine the color at the given coordinates
 
     :param drawables: The drawables to pick from.
@@ -2756,7 +2759,7 @@ def Gimp_Image_remove_path(ctx: Context, path: str) -> str:
     return call_api(ctx, 'Gimp.Image.remove_path', args=[path])
 
 @mcp.tool()
-def Gimp_Image_reorder_item(ctx: Context, item: str, parent: str = None, position: int) -> str:
+def Gimp_Image_reorder_item(ctx: Context, item: str, parent: str = None, position: int = 0) -> str:
     """Reorder the specified item within its item tree
 
     :param item: The item to reorder.
@@ -4088,7 +4091,7 @@ def Gimp_PDB_temp_procedure_name(ctx: Context) -> str:
     return call_api(ctx, 'Gimp.PDB.temp_procedure_name', args=[])
 
 @mcp.tool()
-def Gimp_Palette_add_entry(ctx: Context, entry_name: str = None, color: str, entry_num: int) -> str:
+def Gimp_Palette_add_entry(ctx: Context, entry_name: str = None, color: str = None, entry_num: int = 0) -> str:
     """Appends an entry to the palette.
 
     :param entry_name: A name for the entry.
@@ -4505,7 +4508,7 @@ def Gimp_PlugIn_set_pdb_error_handler(ctx: Context, handler: str) -> str:
     return call_api(ctx, 'Gimp.PlugIn.set_pdb_error_handler', args=[handler])
 
 @mcp.tool()
-def Gimp_Procedure_add_boolean_argument(ctx: Context, name: str, nick: str, blurb: str = None, value: bool, flags: str) -> str:
+def Gimp_Procedure_add_boolean_argument(ctx: Context, name: str, nick: str, blurb: str = None, value: bool = False, flags: str = None) -> str:
     """Add a new boolean argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4517,7 +4520,7 @@ def Gimp_Procedure_add_boolean_argument(ctx: Context, name: str, nick: str, blur
     return call_api(ctx, 'Gimp.Procedure.add_boolean_argument', args=[name, nick, blurb, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_boolean_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, value: bool, flags: str) -> str:
+def Gimp_Procedure_add_boolean_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, value: bool = False, flags: str = None) -> str:
     """Add a new boolean auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4529,7 +4532,7 @@ def Gimp_Procedure_add_boolean_aux_argument(ctx: Context, name: str, nick: str, 
     return call_api(ctx, 'Gimp.Procedure.add_boolean_aux_argument', args=[name, nick, blurb, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_boolean_return_value(ctx: Context, name: str, nick: str, blurb: str = None, value: bool, flags: str) -> str:
+def Gimp_Procedure_add_boolean_return_value(ctx: Context, name: str, nick: str, blurb: str = None, value: bool = False, flags: str = None) -> str:
     """Add a new boolean return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4541,7 +4544,7 @@ def Gimp_Procedure_add_boolean_return_value(ctx: Context, name: str, nick: str, 
     return call_api(ctx, 'Gimp.Procedure.add_boolean_return_value', args=[name, nick, blurb, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_brush_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_brush_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = None, default_value: str = None, default_to_context: bool= False, flags: str = None) -> str:
     """Add a new GimpBrush argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4555,7 +4558,7 @@ def Gimp_Procedure_add_brush_argument(ctx: Context, name: str, nick: str, blurb:
     return call_api(ctx, 'Gimp.Procedure.add_brush_argument', args=[name, nick, blurb, none_ok, default_value, default_to_context, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_brush_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_brush_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, default_value: str = None, default_to_context: bool= False, flags: str = None) -> str:
     """Add a new GimpBrush auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4568,7 +4571,7 @@ def Gimp_Procedure_add_brush_aux_argument(ctx: Context, name: str, nick: str, bl
     return call_api(ctx, 'Gimp.Procedure.add_brush_aux_argument', args=[name, nick, blurb, default_value, default_to_context, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_brush_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_brush_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = None) -> str:
     """Add a new GimpBrush return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4579,7 +4582,7 @@ def Gimp_Procedure_add_brush_return_value(ctx: Context, name: str, nick: str, bl
     return call_api(ctx, 'Gimp.Procedure.add_brush_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_bytes_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_bytes_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = None) -> str:
     """Add a new GBytes argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4590,7 +4593,7 @@ def Gimp_Procedure_add_bytes_argument(ctx: Context, name: str, nick: str, blurb:
     return call_api(ctx, 'Gimp.Procedure.add_bytes_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_bytes_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_bytes_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = None) -> str:
     """Add a new GBytes auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4601,7 +4604,7 @@ def Gimp_Procedure_add_bytes_aux_argument(ctx: Context, name: str, nick: str, bl
     return call_api(ctx, 'Gimp.Procedure.add_bytes_aux_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_bytes_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_bytes_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = None) -> str:
     """Add a new GBytes return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4612,7 +4615,7 @@ def Gimp_Procedure_add_bytes_return_value(ctx: Context, name: str, nick: str, bl
     return call_api(ctx, 'Gimp.Procedure.add_bytes_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_channel_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_channel_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = None) -> str:
     """Add a new GimpChannel argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4624,7 +4627,7 @@ def Gimp_Procedure_add_channel_argument(ctx: Context, name: str, nick: str, blur
     return call_api(ctx, 'Gimp.Procedure.add_channel_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_channel_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_channel_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = None) -> str:
     """Add a new GimpChannel auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4636,7 +4639,7 @@ def Gimp_Procedure_add_channel_aux_argument(ctx: Context, name: str, nick: str, 
     return call_api(ctx, 'Gimp.Procedure.add_channel_aux_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_channel_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_channel_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = None) -> str:
     """Add a new GimpChannel return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4648,7 +4651,7 @@ def Gimp_Procedure_add_channel_return_value(ctx: Context, name: str, nick: str, 
     return call_api(ctx, 'Gimp.Procedure.add_channel_return_value', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_choice_argument(ctx: Context, name: str, nick: str, blurb: str = None, choice: str, value: str, flags: str) -> str:
+def Gimp_Procedure_add_choice_argument(ctx: Context, name: str, nick: str, choice: str = "", value: str = "", flags: str = "", blurb: str = None) -> str:
     """Add a new GimpChoice argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4661,7 +4664,7 @@ def Gimp_Procedure_add_choice_argument(ctx: Context, name: str, nick: str, blurb
     return call_api(ctx, 'Gimp.Procedure.add_choice_argument', args=[name, nick, blurb, choice, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_choice_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, choice: str, value: str, flags: str) -> str:
+def Gimp_Procedure_add_choice_aux_argument(ctx: Context, name: str, nick: str, choice: str = "", value: str = "", flags: str = "", blurb: str = None) -> str:
     """Add a new GimpChoice auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4674,7 +4677,7 @@ def Gimp_Procedure_add_choice_aux_argument(ctx: Context, name: str, nick: str, b
     return call_api(ctx, 'Gimp.Procedure.add_choice_aux_argument', args=[name, nick, blurb, choice, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_choice_return_value(ctx: Context, name: str, nick: str, blurb: str = None, choice: str, value: str, flags: str) -> str:
+def Gimp_Procedure_add_choice_return_value(ctx: Context, name: str, nick: str, choice: str = "", value: str = "", flags: str = "", blurb: str = None) -> str:
     """Add a new GimpChoice return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4687,7 +4690,7 @@ def Gimp_Procedure_add_choice_return_value(ctx: Context, name: str, nick: str, b
     return call_api(ctx, 'Gimp.Procedure.add_choice_return_value', args=[name, nick, blurb, choice, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_color_argument(ctx: Context, name: str, nick: str, blurb: str = None, has_alpha: bool, value: str, flags: str) -> str:
+def Gimp_Procedure_add_color_argument(ctx: Context, name: str, nick: str, has_alpha: bool = False, value: str = "", flags: str = "", blurb: str = None) -> str:
     """Add a new GeglColor argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4700,7 +4703,7 @@ def Gimp_Procedure_add_color_argument(ctx: Context, name: str, nick: str, blurb:
     return call_api(ctx, 'Gimp.Procedure.add_color_argument', args=[name, nick, blurb, has_alpha, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_color_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, has_alpha: bool, value: str, flags: str) -> str:
+def Gimp_Procedure_add_color_aux_argument(ctx: Context, name: str, nick: str, has_alpha: bool = False, value: str = "", flags: str = "", blurb: str = None) -> str:
     """Add a new GeglColor auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4713,7 +4716,7 @@ def Gimp_Procedure_add_color_aux_argument(ctx: Context, name: str, nick: str, bl
     return call_api(ctx, 'Gimp.Procedure.add_color_aux_argument', args=[name, nick, blurb, has_alpha, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_color_from_string_argument(ctx: Context, name: str, nick: str, blurb: str = None, has_alpha: bool, value: str, flags: str) -> str:
+def Gimp_Procedure_add_color_from_string_argument(ctx: Context, name: str, nick: str, has_alpha: bool = False, value: str = "", flags: str = "", blurb: str = None) -> str:
     """Add a new GeglColor argument to procedure from a string representation.
 
     :param name: The name of the argument to be created.
@@ -4726,7 +4729,7 @@ def Gimp_Procedure_add_color_from_string_argument(ctx: Context, name: str, nick:
     return call_api(ctx, 'Gimp.Procedure.add_color_from_string_argument', args=[name, nick, blurb, has_alpha, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_color_from_string_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, has_alpha: bool, value: str, flags: str) -> str:
+def Gimp_Procedure_add_color_from_string_aux_argument(ctx: Context, name: str, nick: str, has_alpha: bool = False, value: str = "", flags: str = "", blurb: str = None) -> str:
     """Add a new GeglColor auxiliary argument to procedure from a string representation.
 
     :param name: The name of the argument to be created.
@@ -4739,7 +4742,7 @@ def Gimp_Procedure_add_color_from_string_aux_argument(ctx: Context, name: str, n
     return call_api(ctx, 'Gimp.Procedure.add_color_from_string_aux_argument', args=[name, nick, blurb, has_alpha, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_color_from_string_return_value(ctx: Context, name: str, nick: str, blurb: str = None, has_alpha: bool, value: str, flags: str) -> str:
+def Gimp_Procedure_add_color_from_string_return_value(ctx: Context, name: str, nick: str, has_alpha: bool = False, value: str = "", flags: str = "", blurb: str = None) -> str:
     """Add a new GeglColor return value to procedure from a string representation.
 
     :param name: The name of the argument to be created.
@@ -4752,7 +4755,7 @@ def Gimp_Procedure_add_color_from_string_return_value(ctx: Context, name: str, n
     return call_api(ctx, 'Gimp.Procedure.add_color_from_string_return_value', args=[name, nick, blurb, has_alpha, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_color_return_value(ctx: Context, name: str, nick: str, blurb: str = None, has_alpha: bool, value: str, flags: str) -> str:
+def Gimp_Procedure_add_color_return_value(ctx: Context, name: str, nick: str, has_alpha: bool = False, value: str = "", flags: str = "", blurb: str = None) -> str:
     """Add a new GeglColor return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4765,46 +4768,43 @@ def Gimp_Procedure_add_color_return_value(ctx: Context, name: str, nick: str, bl
     return call_api(ctx, 'Gimp.Procedure.add_color_return_value', args=[name, nick, blurb, has_alpha, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_core_object_array_argument(ctx: Context, name: str, nick: str, blurb: str = None, object_type: str, flags: str) -> str:
+def Gimp_Procedure_add_core_object_array_argument(ctx: Context, name: str, nick: str, blurb: str = None, object_type: str = "", flags: str = "") -> str:
     """Add a new object array argument to procedure.
 
     :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
     :param blurb: A more detailed help description.
-object_type  the type of object stored in the array.
-    :param object_type: No description available.
+    :param object_type: The type of object stored in the array.
     :param flags: Argument flags.
     """
     return call_api(ctx, 'Gimp.Procedure.add_core_object_array_argument', args=[name, nick, blurb, object_type, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_core_object_array_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, object_type: str, flags: str) -> str:
+def Gimp_Procedure_add_core_object_array_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, object_type: str = "", flags: str = "") -> str:
     """Add a new object array auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
     :param blurb: A more detailed help description.
-object_type  the type of object stored in the array.
-    :param object_type: No description available.
+    :param object_type: The type of object stored in the array.
     :param flags: Argument flags.
     """
     return call_api(ctx, 'Gimp.Procedure.add_core_object_array_aux_argument', args=[name, nick, blurb, object_type, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_core_object_array_return_value(ctx: Context, name: str, nick: str, blurb: str = None, object_type: str, flags: str) -> str:
+def Gimp_Procedure_add_core_object_array_return_value(ctx: Context, name: str, nick: str, blurb: str = None, object_type: str = "", flags: str = "") -> str:
     """Add a new object array return value to procedure.
 
     :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
     :param blurb: A more detailed help description.
-object_type  the type of object stored in the array.
-    :param object_type: No description available.
+    :param object_type: The type of object stored in the array.
     :param flags: Argument flags.
     """
     return call_api(ctx, 'Gimp.Procedure.add_core_object_array_return_value', args=[name, nick, blurb, object_type, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_display_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_display_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpDisplay argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4816,7 +4816,7 @@ def Gimp_Procedure_add_display_argument(ctx: Context, name: str, nick: str, blur
     return call_api(ctx, 'Gimp.Procedure.add_display_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_display_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_display_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpDisplay auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4828,7 +4828,7 @@ def Gimp_Procedure_add_display_aux_argument(ctx: Context, name: str, nick: str, 
     return call_api(ctx, 'Gimp.Procedure.add_display_aux_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_display_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_display_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpDisplay return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4840,7 +4840,7 @@ def Gimp_Procedure_add_display_return_value(ctx: Context, name: str, nick: str, 
     return call_api(ctx, 'Gimp.Procedure.add_display_return_value', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_double_argument(ctx: Context, name: str, nick: str, blurb: str = None, min: float, max: float, value: float, flags: str) -> str:
+def Gimp_Procedure_add_double_argument(ctx: Context, name: str, nick: str, blurb: str = None, min: float = 0.0, max: float = 0.0, value: float = 0.0, flags: str = "") -> str:
     """Add a new floating-point in double precision argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4854,7 +4854,7 @@ def Gimp_Procedure_add_double_argument(ctx: Context, name: str, nick: str, blurb
     return call_api(ctx, 'Gimp.Procedure.add_double_argument', args=[name, nick, blurb, min, max, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_double_array_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_double_array_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = "") -> str:
     """Add a new double array argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4865,7 +4865,7 @@ def Gimp_Procedure_add_double_array_argument(ctx: Context, name: str, nick: str,
     return call_api(ctx, 'Gimp.Procedure.add_double_array_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_double_array_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_double_array_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = "") -> str:
     """Add a new double array auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4876,7 +4876,7 @@ def Gimp_Procedure_add_double_array_aux_argument(ctx: Context, name: str, nick: 
     return call_api(ctx, 'Gimp.Procedure.add_double_array_aux_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_double_array_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_double_array_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = "") -> str:
     """Add a new double array return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4887,7 +4887,7 @@ def Gimp_Procedure_add_double_array_return_value(ctx: Context, name: str, nick: 
     return call_api(ctx, 'Gimp.Procedure.add_double_array_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_double_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, min: float, max: float, value: float, flags: str) -> str:
+def Gimp_Procedure_add_double_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, min: float = 0.0, max: float = 0.0, value: float = 0.0, flags: str = "") -> str:
     """Add a new floating-point in double precision auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4901,7 +4901,7 @@ def Gimp_Procedure_add_double_aux_argument(ctx: Context, name: str, nick: str, b
     return call_api(ctx, 'Gimp.Procedure.add_double_aux_argument', args=[name, nick, blurb, min, max, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_double_return_value(ctx: Context, name: str, nick: str, blurb: str = None, min: float, max: float, value: float, flags: str) -> str:
+def Gimp_Procedure_add_double_return_value(ctx: Context, name: str, nick: str, blurb: str = None, min: float = 0.0, max: float = 0.0, value: float = 0.0, flags: str = "") -> str:
     """Add a new floating-point in double precision return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4915,7 +4915,7 @@ def Gimp_Procedure_add_double_return_value(ctx: Context, name: str, nick: str, b
     return call_api(ctx, 'Gimp.Procedure.add_double_return_value', args=[name, nick, blurb, min, max, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_drawable_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_drawable_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpDrawable argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4927,7 +4927,7 @@ def Gimp_Procedure_add_drawable_argument(ctx: Context, name: str, nick: str, blu
     return call_api(ctx, 'Gimp.Procedure.add_drawable_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_drawable_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_drawable_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpDrawable auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4939,7 +4939,7 @@ def Gimp_Procedure_add_drawable_aux_argument(ctx: Context, name: str, nick: str,
     return call_api(ctx, 'Gimp.Procedure.add_drawable_aux_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_drawable_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_drawable_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpDrawable return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4951,7 +4951,7 @@ def Gimp_Procedure_add_drawable_return_value(ctx: Context, name: str, nick: str,
     return call_api(ctx, 'Gimp.Procedure.add_drawable_return_value', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_enum_argument(ctx: Context, name: str, nick: str, blurb: str = None, enum_type: str, value: int, flags: str) -> str:
+def Gimp_Procedure_add_enum_argument(ctx: Context, name: str, nick: str, blurb: str = None, enum_type: str = "", value: int = 0, flags: str = "") -> str:
     """Add a new enum argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4964,7 +4964,7 @@ def Gimp_Procedure_add_enum_argument(ctx: Context, name: str, nick: str, blurb: 
     return call_api(ctx, 'Gimp.Procedure.add_enum_argument', args=[name, nick, blurb, enum_type, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_enum_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, enum_type: str, value: int, flags: str) -> str:
+def Gimp_Procedure_add_enum_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, enum_type: str = "", value: int = 0, flags: str = "") -> str:
     """Add a new enum auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -4977,7 +4977,7 @@ def Gimp_Procedure_add_enum_aux_argument(ctx: Context, name: str, nick: str, blu
     return call_api(ctx, 'Gimp.Procedure.add_enum_aux_argument', args=[name, nick, blurb, enum_type, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_enum_return_value(ctx: Context, name: str, nick: str, blurb: str = None, enum_type: str, value: int, flags: str) -> str:
+def Gimp_Procedure_add_enum_return_value(ctx: Context, name: str, nick: str, blurb: str = None, enum_type: str = "", value: int = 0, flags: str = "") -> str:
     """Add a new enum return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -4990,7 +4990,7 @@ def Gimp_Procedure_add_enum_return_value(ctx: Context, name: str, nick: str, blu
     return call_api(ctx, 'Gimp.Procedure.add_enum_return_value', args=[name, nick, blurb, enum_type, value, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_file_argument(ctx: Context, name: str, nick: str, blurb: str = None, action: str, none_ok: bool = None, default_file: str = None, flags: str) -> str:
+def Gimp_Procedure_add_file_argument(ctx: Context, name: str, nick: str, blurb: str = None, action: str = "", none_ok: bool = False, default_file: str = "", flags: str = "") -> str:
     """Add a new GFile argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5004,7 +5004,7 @@ def Gimp_Procedure_add_file_argument(ctx: Context, name: str, nick: str, blurb: 
     return call_api(ctx, 'Gimp.Procedure.add_file_argument', args=[name, nick, blurb, action, none_ok, default_file, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_file_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, action: str, none_ok: bool = None, default_file: str = None, flags: str) -> str:
+def Gimp_Procedure_add_file_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, action: str = "", none_ok: bool = False, default_file: str = "", flags: str = "") -> str:
     """Add a new GFile auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5018,7 +5018,7 @@ def Gimp_Procedure_add_file_aux_argument(ctx: Context, name: str, nick: str, blu
     return call_api(ctx, 'Gimp.Procedure.add_file_aux_argument', args=[name, nick, blurb, action, none_ok, default_file, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_file_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_file_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = "") -> str:
     """Add a new GFile return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -5029,7 +5029,7 @@ def Gimp_Procedure_add_file_return_value(ctx: Context, name: str, nick: str, blu
     return call_api(ctx, 'Gimp.Procedure.add_file_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_font_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_font_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, default_value: str = "", default_to_context: bool = False, flags: str = "") -> str:
     """Add a new GimpFont argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5043,7 +5043,7 @@ def Gimp_Procedure_add_font_argument(ctx: Context, name: str, nick: str, blurb: 
     return call_api(ctx, 'Gimp.Procedure.add_font_argument', args=[name, nick, blurb, none_ok, default_value, default_to_context, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_font_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_font_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, default_value: str = "", default_to_context: bool = False, flags: str = "") -> str:
     """Add a new GimpFont auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5056,7 +5056,7 @@ def Gimp_Procedure_add_font_aux_argument(ctx: Context, name: str, nick: str, blu
     return call_api(ctx, 'Gimp.Procedure.add_font_aux_argument', args=[name, nick, blurb, default_value, default_to_context, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_font_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_font_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = "") -> str:
     """Add a new GimpFont return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -5067,7 +5067,7 @@ def Gimp_Procedure_add_font_return_value(ctx: Context, name: str, nick: str, blu
     return call_api(ctx, 'Gimp.Procedure.add_font_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_gradient_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_gradient_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, default_value: str = "", default_to_context: bool = False, flags: str = "") -> str:
     """Add a new GimpGradient argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5081,7 +5081,7 @@ def Gimp_Procedure_add_gradient_argument(ctx: Context, name: str, nick: str, blu
     return call_api(ctx, 'Gimp.Procedure.add_gradient_argument', args=[name, nick, blurb, none_ok, default_value, default_to_context, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_gradient_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_gradient_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, default_value: str = "", default_to_context: bool = False, flags: str = "") -> str:
     """Add a new GimpGradient auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5094,7 +5094,7 @@ def Gimp_Procedure_add_gradient_aux_argument(ctx: Context, name: str, nick: str,
     return call_api(ctx, 'Gimp.Procedure.add_gradient_aux_argument', args=[name, nick, blurb, default_value, default_to_context, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_gradient_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_gradient_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str = "") -> str:
     """Add a new GimpGradient return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -5105,7 +5105,7 @@ def Gimp_Procedure_add_gradient_return_value(ctx: Context, name: str, nick: str,
     return call_api(ctx, 'Gimp.Procedure.add_gradient_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_group_layer_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_group_layer_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpGroupLayer argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5117,7 +5117,7 @@ def Gimp_Procedure_add_group_layer_argument(ctx: Context, name: str, nick: str, 
     return call_api(ctx, 'Gimp.Procedure.add_group_layer_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_group_layer_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_group_layer_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpGroupLayer auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5129,7 +5129,7 @@ def Gimp_Procedure_add_group_layer_aux_argument(ctx: Context, name: str, nick: s
     return call_api(ctx, 'Gimp.Procedure.add_group_layer_aux_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_group_layer_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_group_layer_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpGroupLayer return value to procedure.
 
     :param name: The name of the argument to be created.
@@ -5141,7 +5141,7 @@ def Gimp_Procedure_add_group_layer_return_value(ctx: Context, name: str, nick: s
     return call_api(ctx, 'Gimp.Procedure.add_group_layer_return_value', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_image_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_image_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = "") -> str:
     """Add a new GimpImage argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5153,7 +5153,7 @@ def Gimp_Procedure_add_image_argument(ctx: Context, name: str, nick: str, blurb:
     return call_api(ctx, 'Gimp.Procedure.add_image_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_image_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_image_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = False, flags: str = None) -> str:
     """Add a new GimpImage auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
@@ -5165,650 +5165,650 @@ def Gimp_Procedure_add_image_aux_argument(ctx: Context, name: str, nick: str, bl
     return call_api(ctx, 'Gimp.Procedure.add_image_aux_argument', args=[name, nick, blurb, none_ok, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_image_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_image_return_value(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpImage return value to procedure.
 
     :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
     :param none_ok: Whether no is a valid value.
     :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_image_return_value', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_image_return_value', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_int32_array_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_int32_array_argument(ctx: Context, name: str, nick: str, flags: str = None, blurb: str = None) -> str:
     """Add a new integer array argument to procedure.
 
     :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
     :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_int32_array_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_int32_array_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_int32_array_aux_argument(ctx: Context, name: str, nick: str, flags: str = None, blurb: str = None) -> str:
     """Add a new integer array auxiliary argument to procedure.
 
     :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
     :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_int32_array_aux_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_int32_array_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_int32_array_return_value(ctx: Context, name: str, nick: str, flags: str = None, blurb: str = None) -> str:
     """Add a new integer array return value to procedure.
 
     :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
     :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_int32_array_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_int_argument(ctx: Context, name: str, nick: str, blurb: str = None, min: int, max: int, value: int, flags: str) -> str:
+def Gimp_Procedure_add_int_argument(ctx: Context, name: str, nick: str, min: int, max: int, value: int, flags: str, blurb: str = None) -> str:
     """Add a new integer argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param min: The minimum value for this argument.
-    :param max: The maximum value for this argument.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param min: The minimum value for this argument.
+    :param max: The maximum value for this argument.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_int_argument', args=[name, nick, blurb, min, max, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_int_argument', args=[name, nick, min, max, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_int_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, min: int, max: int, value: int, flags: str) -> str:
+def Gimp_Procedure_add_int_aux_argument(ctx: Context, name: str, nick: str, min: int, max: int, value: int, flags: str, blurb: str = None) -> str:
     """Add a new integer auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param min: The minimum value for this argument.
-    :param max: The maximum value for this argument.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param min: The minimum value for this argument.
+    :param max: The maximum value for this argument.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_int_aux_argument', args=[name, nick, blurb, min, max, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_int_aux_argument', args=[name, nick, min, max, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_int_return_value(ctx: Context, name: str, nick: str, blurb: str = None, min: int, max: int, value: int, flags: str) -> str:
+def Gimp_Procedure_add_int_return_value(ctx: Context, name: str, nick: str, min: int, max: int, value: int, flags: str, blurb: str = None) -> str:
     """Add a new integer return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param min: The minimum value for this argument.
-    :param max: The maximum value for this argument.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param min: The minimum value for this argument.
+    :param max: The maximum value for this argument.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_int_return_value', args=[name, nick, blurb, min, max, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_int_return_value', args=[name, nick, min, max, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_item_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_item_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpItem argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_item_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_item_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_item_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_item_aux_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpItem auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_item_aux_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_item_aux_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_item_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_item_return_value(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpItem return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_item_return_value', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_item_return_value', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_layer_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_layer_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpLayer argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_layer_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_layer_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_layer_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_layer_aux_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpLayer auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_layer_aux_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_layer_aux_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_layer_mask_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_layer_mask_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpLayerMask argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_layer_mask_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_layer_mask_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_layer_mask_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_layer_mask_aux_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpLayerMask auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_layer_mask_aux_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_layer_mask_aux_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_layer_mask_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_layer_mask_return_value(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpLayerMask return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_layer_mask_return_value', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_layer_mask_return_value', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_layer_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_layer_return_value(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpLayer return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_layer_return_value', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_layer_return_value', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
 def Gimp_Procedure_add_menu_path(ctx: Context, menu_path: str) -> str:
     """Adds a menu path to the procedure. Only procedures which have a menu
-label can add a menu path.
+label can add a menu path.
 
-    :param menu_path: The procedure‘s additional menu path.
+    :param menu_path: The procedure‘s additional menu path.
     """
     return call_api(ctx, 'Gimp.Procedure.add_menu_path', args=[menu_path])
 
 @mcp.tool()
-def Gimp_Procedure_add_palette_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_palette_argument(ctx: Context, name: str, nick: str, none_ok: bool = None, default_to_context: bool = False, default_value: str = None, flags: str = None, blurb: str = None) -> str:
     """Add a new GimpPalette argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether NULL is a valid value.
-    :param default_value: Default value.
-    :param default_to_context: Use the context’s palette as default value.
-    :param flags: Argument flags.
+    :param none_ok: Whether NULL is a valid value.
+    :param default_to_context: Use the context’s palette as default value.
+    :param default_value: Default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_palette_argument', args=[name, nick, blurb, none_ok, default_value, default_to_context, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_palette_argument', args=[name, nick, none_ok, default_to_context, default_value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_palette_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_palette_aux_argument(ctx: Context, name: str, nick: str, default_to_context: bool = False, default_value: str = None, flags: str = None, blurb: str = None) -> str:
     """Add a new GimpPalette auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param default_value: Default value.
-    :param default_to_context: Use the context’s palette as default value.
-    :param flags: Argument flags.
+    :param default_to_context: Use the context’s palette as default value.
+    :param default_value: Default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_palette_aux_argument', args=[name, nick, blurb, default_value, default_to_context, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_palette_aux_argument', args=[name, nick, default_to_context, default_value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_palette_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_palette_return_value(ctx: Context, name: str, nick: str, flags: str = None, blurb: str = None) -> str:
     """Add a new GimpPalette return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param flags: Argument flags.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_palette_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_param_argument(ctx: Context, name: str, nick: str, blurb: str = None, param_type: str, flags: str) -> str:
+def Gimp_Procedure_add_param_argument(ctx: Context, name: str, nick: str, param_type: str, flags: str, blurb: str = None) -> str:
     """Add a new param argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param param_type: The GPParamType for this argument.
-    :param flags: Argument flags.
+    :param param_type: The GPParamType for this argument.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_param_argument', args=[name, nick, blurb, param_type, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_param_argument', args=[name, nick, param_type, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_param_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, param_type: str, flags: str) -> str:
+def Gimp_Procedure_add_param_aux_argument(ctx: Context, name: str, nick: str, param_type: str, flags: str, blurb: str = None) -> str:
     """Add a new param auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param param_type: The GPParamType for this argument.
-    :param flags: Argument flags.
+    :param param_type: The GPParamType for this argument.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_param_aux_argument', args=[name, nick, blurb, param_type, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_param_aux_argument', args=[name, nick, param_type, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_param_return_value(ctx: Context, name: str, nick: str, blurb: str = None, param_type: str, flags: str) -> str:
+def Gimp_Procedure_add_param_return_value(ctx: Context, name: str, nick: str, param_type: str, flags: str, blurb: str = None) -> str:
     """Add a new param return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param param_type: The GPParamType for this argument.
-    :param flags: Argument flags.
+    :param param_type: The GPParamType for this argument.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_param_return_value', args=[name, nick, blurb, param_type, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_param_return_value', args=[name, nick, param_type, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_parasite_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_parasite_argument(ctx: Context, name: str, nick: str, flags: str, blurb: str = None) -> str:
     """Add a new GimpParasite argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param flags: Argument flags.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_parasite_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_parasite_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_parasite_aux_argument(ctx: Context, name: str, nick: str, flags: str, blurb: str = None) -> str:
     """Add a new GimpParasite auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param flags: Argument flags.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_parasite_aux_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_parasite_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_parasite_return_value(ctx: Context, name: str, nick: str, flags: str, blurb: str = None) -> str:
     """Add a new GimpParasite return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param flags: Argument flags.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_parasite_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_path_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_path_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpPath argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_path_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_path_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_path_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_path_aux_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpPath auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_path_aux_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_path_aux_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_path_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_path_return_value(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpPath return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_path_return_value', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_path_return_value', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_pattern_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_pattern_argument(ctx: Context, name: str, nick: str, none_ok: bool = None, default_to_context: bool = False, default_value: str = None, flags: str = None, blurb: str = None) -> str:
     """Add a new GimpPattern argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether NULL is a valid value.
-    :param default_value: Default value.
-    :param default_to_context: Use the context’s pattern as default value.
-    :param flags: Argument flags.
+    :param none_ok: Whether NULL is a valid value.
+    :param default_to_context: Use the context’s pattern as default value.
+    :param default_value: Default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_pattern_argument', args=[name, nick, blurb, none_ok, default_value, default_to_context, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_pattern_argument', args=[name, nick, none_ok, default_to_context, default_value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_pattern_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, default_value: str = None, default_to_context: bool, flags: str) -> str:
+def Gimp_Procedure_add_pattern_aux_argument(ctx: Context, name: str, nick: str, default_to_context: bool = False, default_value: str = None, flags: str = None, blurb: str = None) -> str:
     """Add a new GimpPattern auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param default_value: Default value.
-    :param default_to_context: Use the context’s pattern as default value.
-    :param flags: Argument flags.
+    :param default_to_context: Use the context’s pattern as default value.
+    :param default_value: Default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_pattern_aux_argument', args=[name, nick, blurb, default_value, default_to_context, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_pattern_aux_argument', args=[name, nick, default_to_context, default_value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_pattern_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_pattern_return_value(ctx: Context, name: str, nick: str, flags: str = None, blurb: str = None) -> str:
     """Add a new GimpPattern return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param flags: Argument flags.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_pattern_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_resource_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool = None, default_value: str = None, flags: str) -> str:
+def Gimp_Procedure_add_resource_argument(ctx: Context, name: str, nick: str, none_ok: bool = None, default_value: str = None, flags: str = None, blurb: str = None) -> str:
     """Add a new GimpResource argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether NULL is a valid value.
-    :param default_value: Default value.
-    :param flags: Argument flags.
+    :param none_ok: Whether NULL is a valid value.
+    :param default_value: Default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_resource_argument', args=[name, nick, blurb, none_ok, default_value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_resource_argument', args=[name, nick, none_ok, default_value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_resource_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, default_value: str = None, flags: str) -> str:
+def Gimp_Procedure_add_resource_aux_argument(ctx: Context, name: str, nick: str, default_value: str = None, flags: str = None, blurb: str = None) -> str:
     """Add a new GimpResource auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param default_value: Default value.
-    :param flags: Argument flags.
+    :param default_value: Default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_resource_aux_argument', args=[name, nick, blurb, default_value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_resource_aux_argument', args=[name, nick, default_value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_resource_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_resource_return_value(ctx: Context, name: str, nick: str, flags: str = None, blurb: str = None) -> str:
     """Add a new GimpResource return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param flags: Argument flags.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_resource_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_selection_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_selection_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpSelection argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_selection_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_selection_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_selection_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_selection_aux_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpSelection auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_selection_aux_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_selection_aux_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_selection_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_selection_return_value(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpSelection return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_selection_return_value', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_selection_return_value', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_string_argument(ctx: Context, name: str, nick: str, blurb: str = None, value: str, flags: str) -> str:
+def Gimp_Procedure_add_string_argument(ctx: Context, name: str, nick: str, value: str, flags: str, blurb: str = None) -> str:
     """Add a new string argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_string_argument', args=[name, nick, blurb, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_string_argument', args=[name, nick, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_string_array_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_string_array_argument(ctx: Context, name: str, nick: str, flags: str, blurb: str = None) -> str:
     """Add a new string array argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param flags: Argument flags.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_string_array_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_string_array_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_string_array_aux_argument(ctx: Context, name: str, nick: str, flags: str, blurb: str = None) -> str:
     """Add a new string array auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param flags: Argument flags.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_string_array_aux_argument', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_string_array_return_value(ctx: Context, name: str, nick: str, blurb: str = None, flags: str) -> str:
+def Gimp_Procedure_add_string_array_return_value(ctx: Context, name: str, nick: str, flags: str, blurb: str = None) -> str:
     """Add a new string array return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param flags: Argument flags.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
     return call_api(ctx, 'Gimp.Procedure.add_string_array_return_value', args=[name, nick, blurb, flags])
 
 @mcp.tool()
-def Gimp_Procedure_add_string_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, value: str, flags: str) -> str:
+def Gimp_Procedure_add_string_aux_argument(ctx: Context, name: str, nick: str, value: str, flags: str, blurb: str = None) -> str:
     """Add a new string auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_string_aux_argument', args=[name, nick, blurb, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_string_aux_argument', args=[name, nick, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_string_return_value(ctx: Context, name: str, nick: str, blurb: str = None, value: str, flags: str) -> str:
+def Gimp_Procedure_add_string_return_value(ctx: Context, name: str, nick: str, value: str, flags: str, blurb: str = None) -> str:
     """Add a new string return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_string_return_value', args=[name, nick, blurb, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_string_return_value', args=[name, nick, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_text_layer_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_text_layer_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpTextLayer argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_text_layer_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_text_layer_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_text_layer_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_text_layer_aux_argument(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpTextLayer auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_text_layer_aux_argument', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_text_layer_aux_argument', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_text_layer_return_value(ctx: Context, name: str, nick: str, blurb: str = None, none_ok: bool, flags: str) -> str:
+def Gimp_Procedure_add_text_layer_return_value(ctx: Context, name: str, nick: str, none_ok: bool, flags: str, blurb: str = None) -> str:
     """Add a new GimpTextLayer return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param none_ok: Whether no is a valid value.
-    :param flags: Argument flags.
+    :param none_ok: Whether no is a valid value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_text_layer_return_value', args=[name, nick, blurb, none_ok, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_text_layer_return_value', args=[name, nick, none_ok, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_uint_argument(ctx: Context, name: str, nick: str, blurb: str = None, min: int, max: int, value: int, flags: str) -> str:
+def Gimp_Procedure_add_uint_argument(ctx: Context, name: str, nick: str, min: int, max: int, value: int, flags: str, blurb: str = None) -> str:
     """Add a new unsigned integer argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param min: The minimum value for this argument.
-    :param max: The maximum value for this argument.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param min: The minimum value for this argument.
+    :param max: The maximum value for this argument.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_uint_argument', args=[name, nick, blurb, min, max, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_uint_argument', args=[name, nick, min, max, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_uint_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, min: int, max: int, value: int, flags: str) -> str:
+def Gimp_Procedure_add_uint_aux_argument(ctx: Context, name: str, nick: str, min: int, max: int, value: int, flags: str, blurb: str = None) -> str:
     """Add a new unsigned integer auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param min: The minimum value for this argument.
-    :param max: The maximum value for this argument.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param min: The minimum value for this argument.
+    :param max: The maximum value for this argument.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_uint_aux_argument', args=[name, nick, blurb, min, max, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_uint_aux_argument', args=[name, nick, min, max, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_uint_return_value(ctx: Context, name: str, nick: str, blurb: str = None, min: int, max: int, value: int, flags: str) -> str:
+def Gimp_Procedure_add_uint_return_value(ctx: Context, name: str, nick: str, min: int, max: int, value: int, flags: str, blurb: str = None) -> str:
     """Add a new unsigned integer return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param min: The minimum value for this argument.
-    :param max: The maximum value for this argument.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param min: The minimum value for this argument.
+    :param max: The maximum value for this argument.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_uint_return_value', args=[name, nick, blurb, min, max, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_uint_return_value', args=[name, nick, min, max, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_unit_argument(ctx: Context, name: str, nick: str, blurb: str = None, show_pixels: bool, show_percent: bool, value: str, flags: str) -> str:
+def Gimp_Procedure_add_unit_argument(ctx: Context, name: str, nick: str, show_pixels: bool, show_percent: bool, value: str, flags: str, blurb: str = None) -> str:
     """Add a new GimpUnit argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param show_pixels: Whether to allow pixels as a valid option.
-    :param show_percent: Whether to allow percent as a valid option.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param show_pixels: Whether to allow pixels as a valid option.
+    :param show_percent: Whether to allow percent as a valid option.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_unit_argument', args=[name, nick, blurb, show_pixels, show_percent, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_unit_argument', args=[name, nick, show_pixels, show_percent, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_unit_aux_argument(ctx: Context, name: str, nick: str, blurb: str = None, show_pixels: bool, show_percent: bool, value: str, flags: str) -> str:
+def Gimp_Procedure_add_unit_aux_argument(ctx: Context, name: str, nick: str, show_pixels: bool, show_percent: bool, value: str, flags: str, blurb: str = None) -> str:
     """Add a new GimpUnit auxiliary argument to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param show_pixels: Whether to allow pixels as a valid option.
-    :param show_percent: Whether to allow percent as a valid option.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param show_pixels: Whether to allow pixels as a valid option.
+    :param show_percent: Whether to allow percent as a valid option.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_unit_aux_argument', args=[name, nick, blurb, show_pixels, show_percent, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_unit_aux_argument', args=[name, nick, show_pixels, show_percent, value, flags, blurb])
 
 @mcp.tool()
-def Gimp_Procedure_add_unit_return_value(ctx: Context, name: str, nick: str, blurb: str = None, show_pixels: bool, show_percent: bool, value: str, flags: str) -> str:
+def Gimp_Procedure_add_unit_return_value(ctx: Context, name: str, nick: str, show_pixels: bool, show_percent: bool, value: str, flags: str, blurb: str = None) -> str:
     """Add a new GimpUnit return value to procedure.
 
-    :param name: The name of the argument to be created.
+    :param name: The name of the argument to be created.
     :param nick: The label used in GimpProcedureDialog.
-    :param blurb: A more detailed help description.
-    :param show_pixels: Whether to allow pixels as a valid option.
-    :param show_percent: Whether to allow percent as a valid option.
-    :param value: The default value.
-    :param flags: Argument flags.
+    :param show_pixels: Whether to allow pixels as a valid option.
+    :param show_percent: Whether to allow percent as a valid option.
+    :param value: The default value.
+    :param flags: Argument flags.
+    :param blurb: A more detailed help description.
     """
-    return call_api(ctx, 'Gimp.Procedure.add_unit_return_value', args=[name, nick, blurb, show_pixels, show_percent, value, flags])
+    return call_api(ctx, 'Gimp.Procedure.add_unit_return_value', args=[name, nick, show_pixels, show_percent, value, flags, blurb])
 
 @mcp.tool()
 def Gimp_Procedure_create_config(ctx: Context) -> str:
@@ -6026,16 +6026,15 @@ been properly initialized and is ready to run.
     return call_api(ctx, 'Gimp.Procedure.persistent_ready', args=[])
 
 @mcp.tool()
-def Gimp_Procedure_run(ctx: Context, first_arg_name: str = None, ...: str) -> str:
+def Gimp_Procedure_run(ctx: Context, first_arg_name: str = None, *args: str) -> str:
     """Runs the procedure named procedure_name with arguments given as
 list of (name, value) pairs, terminated by NULL.
 
     :param first_arg_name: The name of an argument of procedure or NULL to
                  run procedure with default arguments.
-    :param ...: The value of first_arg_name and any more argument
-                 names and values as needed.
+    :param args: Additional argument names and values.
     """
-    return call_api(ctx, 'Gimp.Procedure.run', args=[first_arg_name, ...])
+    return call_api(ctx, 'Gimp.Procedure.run', args=[first_arg_name] + list(args))
 
 @mcp.tool()
 def Gimp_Procedure_run_config(ctx: Context, config: str = None) -> str:
@@ -6046,17 +6045,15 @@ def Gimp_Procedure_run_config(ctx: Context, config: str = None) -> str:
     return call_api(ctx, 'Gimp.Procedure.run_config', args=[config])
 
 @mcp.tool()
-def Gimp_Procedure_run_valist(ctx: Context, first_arg_name: str = None, args: str) -> str:
-    """Runs procedure with arguments names and values, given in the order as passed
+def Gimp_Procedure_run_valist(ctx: Context, first_arg_name: str = None, *args: str) -> str:
+    """Runs procedure with argument names and values, given in the order as passed
 to gimp_procedure_run().
 
     :param first_arg_name: The name of an argument of procedure or NULL to
                  run procedure with default arguments.
-args            the value of first_arg_name and any more argument
-                 names and values as needed.
-    :param args: No description available.
+    :param args: Additional argument names and values.
     """
-    return call_api(ctx, 'Gimp.Procedure.run_valist', args=[first_arg_name, args])
+    return call_api(ctx, 'Gimp.Procedure.run_valist', args=[first_arg_name] + list(args))
 
 @mcp.tool()
 def Gimp_Procedure_set_argument_sync(ctx: Context, arg_name: str, sync: str) -> str:
